@@ -9,14 +9,17 @@ namespace KooliProjekt.Application.Data
     public class Tellimus
     {
         public int Id { get; set; }
-        public string InvoiceNumber { get; set; }
-        public DateTime InvoiceDate { get; set; }
-        public DateTime DueDate { get; set; }
-        public string Status { get; set; }
-        public decimal SubTotal { get; set; }
-        public decimal ShippingTotal { get; set; }
-        public decimal Discount { get; set; }
-        public decimal GrandTotal { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal LineTotal { get; set; }
+
+        // VAT
+        public decimal VatRate { get; set; }
+        public decimal VatAmount { get; set; }
+
+        // viide Toode
+        public int ToodeId { get; set; }
+        public Toode Toode { get; set; }
 
         public int ArveId { get; set; }
         public Arve Arve { get; set; }

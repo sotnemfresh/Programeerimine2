@@ -50,11 +50,14 @@ namespace KooliProjekt.Application.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    LineItem = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    VatRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Total = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    InvoiceNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    InvoiceDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SubTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ShippingTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    GrandTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     KlientId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -74,14 +77,12 @@ namespace KooliProjekt.Application.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    InvoiceNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    InvoiceDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SubTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    ShippingTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    GrandTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    LineTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    VatRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    VatAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ToodeId = table.Column<int>(type: "int", nullable: false),
                     ArveId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -93,6 +94,12 @@ namespace KooliProjekt.Application.Migrations
                         principalTable: "Arved",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Tellimused_Tooted_ToodeId",
+                        column: x => x.ToodeId,
+                        principalTable: "Tooted",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -104,6 +111,11 @@ namespace KooliProjekt.Application.Migrations
                 name: "IX_Tellimused_ArveId",
                 table: "Tellimused",
                 column: "ArveId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tellimused_ToodeId",
+                table: "Tellimused",
+                column: "ToodeId");
         }
 
         /// <inheritdoc />
@@ -113,10 +125,10 @@ namespace KooliProjekt.Application.Migrations
                 name: "Tellimused");
 
             migrationBuilder.DropTable(
-                name: "Tooted");
+                name: "Arved");
 
             migrationBuilder.DropTable(
-                name: "Arved");
+                name: "Tooted");
 
             migrationBuilder.DropTable(
                 name: "Kliendid");

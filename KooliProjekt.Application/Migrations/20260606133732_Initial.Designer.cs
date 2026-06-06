@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KooliProjekt.Application.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260606102903_Initial")]
+    [Migration("20260606133732_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -33,22 +33,31 @@ namespace KooliProjekt.Application.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("GrandTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("InvoiceDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InvoiceNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("KlientId")
                         .HasColumnType("int");
 
-                    b.Property<string>("LineItem")
+                    b.Property<decimal>("ShippingTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("VatRate")
+                    b.Property<decimal>("SubTotal")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -97,33 +106,29 @@ namespace KooliProjekt.Application.Migrations
                     b.Property<int>("ArveId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Discount")
+                    b.Property<decimal>("LineTotal")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("GrandTotal")
+                    b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime>("InvoiceDate")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("ToodeId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("InvoiceNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("ShippingTotal")
+                    b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<decimal>("VatAmount")
+                        .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("SubTotal")
+                    b.Property<decimal>("VatRate")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ArveId");
+
+                    b.HasIndex("ToodeId");
 
                     b.ToTable("Tellimused");
                 });
@@ -172,7 +177,15 @@ namespace KooliProjekt.Application.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("KooliProjekt.Application.Data.Toode", "Toode")
+                        .WithMany()
+                        .HasForeignKey("ToodeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Arve");
+
+                    b.Navigation("Toode");
                 });
 
             modelBuilder.Entity("KooliProjekt.Application.Data.Arve", b =>

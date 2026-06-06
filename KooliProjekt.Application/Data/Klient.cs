@@ -15,6 +15,6 @@ namespace KooliProjekt.Application.Data
         public string Phone { get; set; }
         public decimal Discount { get; set; }
 
-        public List<Arve> Arved {  get; set; }
+        public List<Arve> Arved { get; set; } = new List<Arve>();
     }
 }

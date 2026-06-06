@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KooliProjekt.Application.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260606165724_Initial")]
+    [Migration("20260606200501_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -98,13 +98,13 @@ namespace KooliProjekt.Application.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasColumnName("Eesnimi");
+                        .HasColumnName("FirstName");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasColumnName("Perenimi");
+                        .HasColumnName("LastName");
 
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");

@@ -15,11 +15,20 @@ namespace KooliProjekt.WebAPI.Controllers
         }
 
         [HttpGet]
+        [Route("List")]
         public async Task<IActionResult> List([FromQuery] ListArvedQuery query)
         {
             var response = await _mediator.Send(query);
-
             return Result(response);
         }
+
+        [HttpGet]
+        [Route("Get")]
+        public async Task<IActionResult> Get(int id)
+        {
+            var response = await _mediator.Send(new GetArveQuery { Id = id });
+            return Result(response);
+        }
+
     }
 }

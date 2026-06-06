@@ -1,22 +1,22 @@
-using KooliProjekt.Application.Features.Kliendid;
+﻿using KooliProjekt.Application.Features.TellimuseRead;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace KooliProjekt.WebAPI.Controllers
 {
-    public class KliendidController : ApiControllerBase
+    public class TellimuseReadController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
-        public KliendidController(IMediator mediator)
+        public TellimuseReadController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
         [HttpGet]
         [Route("List")]
-        public async Task<IActionResult> List([FromQuery] ListKliendidQuery query)
+        public async Task<IActionResult> List([FromQuery] ListTellimuseReadQuery query)
         {
             var response = await _mediator.Send(query);
             return Result(response);
@@ -26,7 +26,7 @@ namespace KooliProjekt.WebAPI.Controllers
         [Route("Get")]
         public async Task<IActionResult> Get(int id)
         {
-            var response = await _mediator.Send(new GetKlientQuery { Id = id });
+            var response = await _mediator.Send(new GetTellimuseReadQuery { Id = id });
             return Result(response);
         }
     }

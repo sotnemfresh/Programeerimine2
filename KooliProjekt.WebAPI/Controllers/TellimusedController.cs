@@ -29,5 +29,13 @@ namespace KooliProjekt.WebAPI.Controllers
             var response = await _mediator.Send(new GetTellimusQuery { Id = id });
             return Result(response);
         }
+        
+        [HttpPost]
+        [Route("Save")]
+        public async Task<IActionResult> Save(SaveTellimusCommand command)
+        {
+            var response = await _mediator.Send(command);
+            return Result(response);
+        }
     }
 }

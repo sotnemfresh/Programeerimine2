@@ -17,13 +17,6 @@ namespace KooliProjekt.Application.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Fix incorrect columns from old DB
-            modelBuilder.Entity<Klient>(entity =>
-            {
-                entity.Property(e => e.FirstName).HasColumnName("Eesnimi");
-                entity.Property(e => e.LastName).HasColumnName("Perenimi");
-            });
-
             // Tellimus 1 - 1 Arve
             modelBuilder.Entity<Arve>()
                 .HasOne(a => a.Tellimus)

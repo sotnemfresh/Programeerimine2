@@ -29,5 +29,13 @@ namespace KooliProjekt.WebAPI.Controllers
             var response = await _mediator.Send(new GetKlientQuery { Id = id });
             return Result(response);
         }
+        
+        [HttpPost]
+        [Route("Save")]
+        public async Task<IActionResult> Save(SaveKlientCommand command)
+        {
+            var response = await _mediator.Send(command);
+            return Result(response);
+        }
     }
 }

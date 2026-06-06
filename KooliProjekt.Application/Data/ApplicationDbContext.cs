@@ -17,5 +17,6 @@ namespace KooliProjekt.Application.Data
         public DbSet<Klient> Kliendid { get; set; }
         public DbSet<Arve> Arved { get; set; }
         public DbSet<Tellimus> Tellimused { get; set; }
+        
     }
 }

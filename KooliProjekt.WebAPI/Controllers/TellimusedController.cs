@@ -1,15 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using KooliProjekt.Application.Data;
 using KooliProjekt.Application.Features.Tellimused;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace KooliProjekt.WebAPI.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class TellimusedController : ControllerBase
+    public class TellimusedController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -18,11 +14,11 @@ namespace KooliProjekt.WebAPI.Controllers
             _mediator = mediator;
         }
 
-        // GET: /api/tellimused
         [HttpGet]
-        public async Task<List<Tellimus>> List()
+        public async Task<IActionResult> List([FromQuery] ListTellimusedQuery query)
         {
-            return await _mediator.Send(new List.Query());
+            var response = await _mediator.Send(query);
+            return Result(response);
         }
     }
 }

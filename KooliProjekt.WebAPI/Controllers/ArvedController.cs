@@ -1,15 +1,11 @@
-﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using KooliProjekt.Application.Data;
 using KooliProjekt.Application.Features.Arved;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KooliProjekt.WebAPI.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ArvedController : ControllerBase
+    public class ArvedController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -18,11 +14,12 @@ namespace KooliProjekt.WebAPI.Controllers
             _mediator = mediator;
         }
 
-        // GET: /api/arved
         [HttpGet]
-        public async Task<List<Arve>> List()
+        public async Task<IActionResult> List([FromQuery] ListArvedQuery query)
         {
-            return await _mediator.Send(new List.Query());
+            var response = await _mediator.Send(query);
+
+            return Result(response);
         }
     }
 }

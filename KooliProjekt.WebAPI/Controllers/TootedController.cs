@@ -1,15 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using KooliProjekt.Application.Data;
 using KooliProjekt.Application.Features.Tooted;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace KooliProjekt.WebAPI.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class TootedController : ControllerBase
+    public class TootedController : ApiControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -18,11 +14,11 @@ namespace KooliProjekt.WebAPI.Controllers
             _mediator = mediator;
         }
 
-        // GET: /api/tooted
         [HttpGet]
-        public async Task<List<Toode>> List()
+        public async Task<IActionResult> List([FromQuery] ListTootedQuery query)
         {
-            return await _mediator.Send(new List.Query());
+            var response = await _mediator.Send(query);
+            return Result(response);
         }
     }
 }

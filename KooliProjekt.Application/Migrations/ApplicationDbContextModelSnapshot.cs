@@ -43,7 +43,9 @@ namespace KooliProjekt.Application.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("InvoiceNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("KlientId")
                         .HasColumnType("int");
@@ -52,14 +54,21 @@ namespace KooliProjekt.Application.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<decimal>("SubTotal")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("TellimusId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("KlientId");
+
+                    b.HasIndex("TellimusId")
+                        .IsUnique();
 
                     b.ToTable("Arved");
                 });
@@ -73,7 +82,8 @@ namespace KooliProjekt.Application.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(18,2)");
@@ -81,8 +91,17 @@ namespace KooliProjekt.Application.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("Eesnimi");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("Perenimi");
 
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
@@ -100,14 +119,39 @@ namespace KooliProjekt.Application.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ArveId")
+                    b.Property<int>("KlientId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KlientId");
+
+                    b.ToTable("Tellimused");
+                });
+
+            modelBuilder.Entity("KooliProjekt.Application.Data.TellimuseRida", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("LineTotal")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TellimusId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ToodeId")
                         .HasColumnType("int");
@@ -123,11 +167,11 @@ namespace KooliProjekt.Application.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ArveId");
+                    b.HasIndex("TellimusId");
 
                     b.HasIndex("ToodeId");
 
-                    b.ToTable("Tellimused");
+                    b.ToTable("TellimusedRida");
                 });
 
             modelBuilder.Entity("KooliProjekt.Application.Data.Toode", b =>
@@ -139,15 +183,22 @@ namespace KooliProjekt.Application.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("FotoURL")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("StockQuantity")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -163,15 +214,34 @@ namespace KooliProjekt.Application.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("KooliProjekt.Application.Data.Tellimus", "Tellimus")
+                        .WithOne("Arve")
+                        .HasForeignKey("KooliProjekt.Application.Data.Arve", "TellimusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Klient");
+
+                    b.Navigation("Tellimus");
                 });
 
             modelBuilder.Entity("KooliProjekt.Application.Data.Tellimus", b =>
                 {
-                    b.HasOne("KooliProjekt.Application.Data.Arve", "Arve")
+                    b.HasOne("KooliProjekt.Application.Data.Klient", "Klient")
                         .WithMany("Tellimused")
-                        .HasForeignKey("ArveId")
+                        .HasForeignKey("KlientId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Klient");
+                });
+
+            modelBuilder.Entity("KooliProjekt.Application.Data.TellimuseRida", b =>
+                {
+                    b.HasOne("KooliProjekt.Application.Data.Tellimus", "Tellimus")
+                        .WithMany("TellimuseRead")
+                        .HasForeignKey("TellimusId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("KooliProjekt.Application.Data.Toode", "Toode")
@@ -180,19 +250,23 @@ namespace KooliProjekt.Application.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Arve");
+                    b.Navigation("Tellimus");
 
                     b.Navigation("Toode");
-                });
-
-            modelBuilder.Entity("KooliProjekt.Application.Data.Arve", b =>
-                {
-                    b.Navigation("Tellimused");
                 });
 
             modelBuilder.Entity("KooliProjekt.Application.Data.Klient", b =>
                 {
                     b.Navigation("Arved");
+
+                    b.Navigation("Tellimused");
+                });
+
+            modelBuilder.Entity("KooliProjekt.Application.Data.Tellimus", b =>
+                {
+                    b.Navigation("Arve");
+
+                    b.Navigation("TellimuseRead");
                 });
 #pragma warning restore 612, 618
         }

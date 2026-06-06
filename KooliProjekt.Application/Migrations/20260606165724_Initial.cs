@@ -17,8 +17,9 @@ namespace KooliProjekt.Application.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Eesnimi = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Perenimi = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
@@ -34,14 +35,36 @@ namespace KooliProjekt.Application.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FotoURL = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    FotoURL = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    StockQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tooted", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tellimused",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    KlientId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tellimused", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tellimused_Kliendid_KlientId",
+                        column: x => x.KlientId,
+                        principalTable: "Kliendid",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -50,15 +73,16 @@ namespace KooliProjekt.Application.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    InvoiceNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    InvoiceNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     InvoiceDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     SubTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ShippingTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     GrandTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    KlientId = table.Column<int>(type: "int", nullable: false)
+                    KlientId = table.Column<int>(type: "int", nullable: false),
+                    TellimusId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,10 +93,16 @@ namespace KooliProjekt.Application.Migrations
                         principalTable: "Kliendid",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Arved_Tellimused_TellimusId",
+                        column: x => x.TellimusId,
+                        principalTable: "Tellimused",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tellimused",
+                name: "TellimusedRida",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -83,19 +113,19 @@ namespace KooliProjekt.Application.Migrations
                     VatRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     VatAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ToodeId = table.Column<int>(type: "int", nullable: false),
-                    ArveId = table.Column<int>(type: "int", nullable: false)
+                    TellimusId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tellimused", x => x.Id);
+                    table.PrimaryKey("PK_TellimusedRida", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Tellimused_Arved_ArveId",
-                        column: x => x.ArveId,
-                        principalTable: "Arved",
+                        name: "FK_TellimusedRida_Tellimused_TellimusId",
+                        column: x => x.TellimusId,
+                        principalTable: "Tellimused",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Tellimused_Tooted_ToodeId",
+                        name: "FK_TellimusedRida_Tooted_ToodeId",
                         column: x => x.ToodeId,
                         principalTable: "Tooted",
                         principalColumn: "Id",
@@ -108,13 +138,24 @@ namespace KooliProjekt.Application.Migrations
                 column: "KlientId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tellimused_ArveId",
-                table: "Tellimused",
-                column: "ArveId");
+                name: "IX_Arved_TellimusId",
+                table: "Arved",
+                column: "TellimusId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tellimused_ToodeId",
+                name: "IX_Tellimused_KlientId",
                 table: "Tellimused",
+                column: "KlientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TellimusedRida_TellimusId",
+                table: "TellimusedRida",
+                column: "TellimusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TellimusedRida_ToodeId",
+                table: "TellimusedRida",
                 column: "ToodeId");
         }
 
@@ -122,10 +163,13 @@ namespace KooliProjekt.Application.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Tellimused");
+                name: "Arved");
 
             migrationBuilder.DropTable(
-                name: "Arved");
+                name: "TellimusedRida");
+
+            migrationBuilder.DropTable(
+                name: "Tellimused");
 
             migrationBuilder.DropTable(
                 name: "Tooted");

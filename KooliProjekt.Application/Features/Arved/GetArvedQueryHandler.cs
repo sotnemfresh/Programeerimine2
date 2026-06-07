@@ -23,6 +23,11 @@ namespace KooliProjekt.Application.Features.Arved
         {
             if (request == null)
             {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            if (request.Id <= 0)
+            {
                 return new OperationResult<ArveDto> { Value = null };
             }
 

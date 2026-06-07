@@ -23,6 +23,12 @@ namespace KooliProjekt.Application.Features.Kliendid
         {
             if (request == null)
             {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            // Handler ei tee andmebaasi päringut kui request.Id <= 0
+            if (request.Id <= 0)
+            {
                 return new OperationResult<KlientDto> { Value = null };
             }
 

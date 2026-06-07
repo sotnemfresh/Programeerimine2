@@ -23,6 +23,10 @@ namespace KooliProjekt.Application.Features.Tooted
         {
             if (request == null)
             {
+                throw new ArgumentNullException(nameof(request));
+            }
+            if (request.Id <= 0)
+            {
                 return new OperationResult<ToodeDto> { Value = null };
             }
 

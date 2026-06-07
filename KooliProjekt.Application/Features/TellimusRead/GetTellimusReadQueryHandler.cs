@@ -23,6 +23,11 @@ namespace KooliProjekt.Application.Features.TellimuseRead
         {
             if (request == null)
             {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            if (request.Id <= 0)
+            {
                 return new OperationResult<TellimuseRidaDto> { Value = null };
             }
 

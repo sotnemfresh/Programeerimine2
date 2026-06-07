@@ -1,4 +1,5 @@
-﻿using KooliProjekt.Application.Data;
+﻿using System;
+using KooliProjekt.Application.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace KooliProjekt.Application.UnitTests
@@ -23,6 +24,14 @@ namespace KooliProjekt.Application.UnitTests
                 _dbContext = new ApplicationDbContext(options);
                 return _dbContext;
             }
+        }
+
+        // Meetod vigase andmebaasi tekitamiseks
+        protected ApplicationDbContext GetFaultyDbContext()
+        {
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>();
+            var dbContext = new ApplicationDbContext(options.Options);
+            return dbContext;
         }
 
         protected virtual void Dispose(bool disposing)

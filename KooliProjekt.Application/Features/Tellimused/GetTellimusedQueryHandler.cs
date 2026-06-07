@@ -23,6 +23,11 @@ namespace KooliProjekt.Application.Features.Tellimused
         {
             if (request == null)
             {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            if (request.Id <= 0)
+            {
                 return new OperationResult<TellimusDto> { Value = null };
             }
 

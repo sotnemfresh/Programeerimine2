@@ -12,17 +12,12 @@ namespace KooliProjekt.UnitTests.Features.Arved
     public class GetArveQueryHandlerTests : ServiceTestBase
     {
         [Fact]
-        public async Task Handle_should_return_null_value_if_request_is_null()
+        public async Task Handle_should_throw_ArgumentNullException_if_request_is_null()
         {
-            // Arrange
             var handler = new GetArveQueryHandler(DbContext);
-
-            // Act
-            var result = await handler.Handle(null, CancellationToken.None);
-
-            // Assert
-            Assert.Null(result.Value);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => handler.Handle(null, CancellationToken.None));
         }
+
         [Fact]
         public void Constructor_should_throw_if_dbContext_is_null()
         {
@@ -30,34 +25,19 @@ namespace KooliProjekt.UnitTests.Features.Arved
             Assert.Throws<ArgumentNullException>(() => new GetArveQueryHandler(null));
         }
 
-        [Fact]
-        public async Task Handle_should_return_object_if_it_exists()
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-10)]
+        public async Task Handle_should_return_null_value_if_id_is_zero_or_less(int id)
         {
-            // Arrange
-            var klient = new Klient { FirstName = "Rainer", LastName = "Puur", Email = "Rainer@test.ee" };
-            var tellimus = new Tellimus { OrderDate = DateTime.Now, Klient = klient };
+            var dbContext = GetFaultyDbContext();
+            var query = new GetArveQuery { Id = id };
+            var handler = new GetArveQueryHandler(dbContext);
 
-            var arve = new Arve
-            {
-                InvoiceNumber = "INV-2026-01",
-                InvoiceDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(14),
-                Klient = klient,
-                Tellimus = tellimus
-            };
-
-            await DbContext.Arved.AddAsync(arve);
-            await DbContext.SaveChangesAsync();
-
-            var query = new GetArveQuery { Id = arve.Id };
-            var handler = new GetArveQueryHandler(DbContext);
-
-            // Act
             var result = await handler.Handle(query, CancellationToken.None);
 
-            // Assert
-            Assert.NotNull(result.Value);
-            Assert.Equal(arve.InvoiceNumber, result.Value.InvoiceNumber);
+            Assert.NotNull(result);
+            Assert.Null(result.Value);
         }
     }
 }

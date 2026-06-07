@@ -61,5 +61,21 @@ namespace KooliProjekt.UnitTests.Features.Kliendid
             Assert.False(result.HasErrors);
             Assert.Equal("Malle-Liis", updatedKlient.FirstName);
         }
+
+        // --- VALIDAATORI TESTID ---
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void Validator_should_fail_when_LastName_is_missing(string lastName)
+        {
+            var validator = new SaveKlientCommandValidator();
+            var command = new SaveKlientCommand { FirstName = "Test", LastName = lastName };
+
+            var result = validator.Validate(command);
+
+            Assert.False(result.IsValid);
+            Assert.Contains(result.Errors, e => e.PropertyName == nameof(SaveKlientCommand.LastName));
+        }
     }
 }

@@ -101,5 +101,50 @@ namespace KooliProjekt.UnitTests.Features.Arved
             Assert.True(result.HasErrors);
             Assert.Contains("Cannot find", result.Errors[0]); // Kontrollime, et viga on õige
         }
+
+        // --- VALIDAATORI TESTID (Validator Tests) ---
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void Validator_should_fail_when_InvoiceNumber_is_empty(string invoiceNumber)
+        {
+            var validator = new SaveArveCommandValidator();
+            var command = new SaveArveCommand { InvoiceNumber = invoiceNumber };
+
+            var result = validator.Validate(command);
+
+            Assert.False(result.IsValid);
+            Assert.Contains(result.Errors, e => e.PropertyName == nameof(SaveArveCommand.InvoiceNumber));
+        }
+
+        [Fact]
+        public void Validator_should_fail_when_InvoiceNumber_is_too_long()
+        {
+            // Eeldame, et max pikkus on 50
+            var longNumber = new string('A', 51);
+            var validator = new SaveArveCommandValidator();
+            var command = new SaveArveCommand { InvoiceNumber = longNumber };
+
+            var result = validator.Validate(command);
+
+            Assert.False(result.IsValid);
+            Assert.Equal(nameof(SaveArveCommand.InvoiceNumber), result.Errors.First().PropertyName);
+        }
+
+        [Fact]
+        public void Validator_should_pass_when_data_is_valid()
+        {
+            var validator = new SaveArveCommandValidator();
+            var command = new SaveArveCommand
+            {
+                InvoiceNumber = "VALID-123",
+                TellimusId = 1
+            };
+
+            var result = validator.Validate(command);
+
+            Assert.True(result.IsValid);
+        }
     }
 }

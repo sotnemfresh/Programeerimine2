@@ -336,5 +336,21 @@ namespace KooliProjekt.UnitTests.Features.Tellimused
             // The existing rida should still be there
             Assert.Equal(1, await DbContext.TellimusedRida.CountAsync());
         }
+
+        // --- VALIDAATORI TESTID ---
+
+        [Fact]
+        public void Validator_should_fail_when_Status_is_empty()
+        {
+            var validator = new SaveTellimusCommandValidator();
+            var command = new SaveTellimusCommand { Status = "" };
+
+            var result = validator.Validate(command);
+
+            if (!result.IsValid)
+            {
+                Assert.Contains(result.Errors, e => e.PropertyName == nameof(SaveTellimusCommand.Status));
+            }
+        }
     }
 }

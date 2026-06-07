@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
@@ -15,11 +16,16 @@ namespace KooliProjekt.Application.Features.Tellimused
 
         public GetTellimusQueryHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult<TellimusDto>> Handle(GetTellimusQuery request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                return new OperationResult<TellimusDto> { Value = null };
+            }
+
             var result = new OperationResult<TellimusDto>();
 
             var tellimus = await _dbContext.Tellimused
@@ -74,7 +80,7 @@ namespace KooliProjekt.Application.Features.Tellimused
                         }
                     }).ToList()
                 })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
             result.Value = tellimus;
             return result;

@@ -1,4 +1,5 @@
-﻿﻿using System.Linq;
+﻿﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
@@ -15,11 +16,16 @@ namespace KooliProjekt.Application.Features.TellimuseRead
 
         public GetTellimuseReadQueryHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult<TellimuseRidaDto>> Handle(GetTellimuseReadQuery request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                return new OperationResult<TellimuseRidaDto> { Value = null };
+            }
+
             var result = new OperationResult<TellimuseRidaDto>();
 
             var rida = await _dbContext.TellimusedRida
@@ -41,7 +47,7 @@ namespace KooliProjekt.Application.Features.TellimuseRead
                         StockQuantity = r.Toode.StockQuantity
                     }
                 })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
             result.Value = rida;
             return result;

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
@@ -15,14 +16,19 @@ namespace KooliProjekt.Application.Features.Kliendid
 
         public GetKlientQueryHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult<KlientDto>> Handle(GetKlientQuery request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                return new OperationResult<KlientDto> { Value = null };
+            }
+
             var result = new OperationResult<KlientDto>();
 
-            var klient = await _dbContext.Kliendid
+            result.Value = await _dbContext.Kliendid
                 .Where(k => k.Id == request.Id)
                 .Select(k => new KlientDto
                 {
@@ -34,9 +40,8 @@ namespace KooliProjekt.Application.Features.Kliendid
                     Phone = k.Phone,
                     Discount = k.Discount
                 })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
-            result.Value = klient;
             return result;
         }
     }

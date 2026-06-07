@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
@@ -15,11 +16,16 @@ namespace KooliProjekt.Application.Features.Arved
 
         public GetArveQueryHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult<ArveDto>> Handle(GetArveQuery request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                return new OperationResult<ArveDto> { Value = null };
+            }
+
             var result = new OperationResult<ArveDto>();
 
             var arve = await _dbContext.Arved
@@ -59,7 +65,7 @@ namespace KooliProjekt.Application.Features.Arved
                         RidadeArv = a.Tellimus.TellimuseRead.Count
                     }
                 })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
             result.Value = arve;
             return result;

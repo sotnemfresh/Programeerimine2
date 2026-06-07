@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
@@ -15,11 +16,16 @@ namespace KooliProjekt.Application.Features.Tooted
 
         public GetToodeQueryHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult<ToodeDto>> Handle(GetToodeQuery request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                return new OperationResult<ToodeDto> { Value = null };
+            }
+
             var result = new OperationResult<ToodeDto>();
 
             var toode = await _dbContext.Tooted
@@ -33,7 +39,7 @@ namespace KooliProjekt.Application.Features.Tooted
                     Price = t.Price,
                     StockQuantity = t.StockQuantity
                 })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
             result.Value = toode;
             return result;

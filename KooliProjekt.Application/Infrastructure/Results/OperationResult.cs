@@ -6,6 +6,7 @@ namespace KooliProjekt.Application.Infrastructure.Results
     {
         public IDictionary<string, string> PropertyErrors { get; private set; }
         public IList<string> Errors { get; private set; }
+        public bool Success { get; set; }
 
         public bool HasErrors 
         {

@@ -14,18 +14,40 @@ namespace KooliProjekt.Application.Features.Tellimused
 
         public SaveTellimusCommandHandler(ApplicationDbContext dbContext)
         {
+            if (dbContext == null) throw new System.ArgumentNullException(nameof(dbContext));
             _dbContext = dbContext;
         }
 
         public async Task<OperationResult> Handle(SaveTellimusCommand request, CancellationToken cancellationToken)
         {
+            if (request == null) throw new System.ArgumentNullException(nameof(request));
             var result = new OperationResult();
-            var tellimus = request.Id == 0 ? new Tellimus() : await _dbContext.Tellimused
-                .Include(t => t.TellimuseRead)
-                .FirstOrDefaultAsync(t => t.Id == request.Id);
+
+            if (request.Id < 0)
+            {
+                result.AddError("Request ID cannot be negative");
+                return result;
+            }
+
+            Tellimus tellimus;
 
             if (request.Id == 0)
-                await _dbContext.Tellimused.AddAsync(tellimus);
+            {
+                tellimus = new Tellimus();
+                await _dbContext.Tellimused.AddAsync(tellimus, cancellationToken);
+            }
+            else
+            {
+                tellimus = await _dbContext.Tellimused
+                    .Include(t => t.TellimuseRead)
+                    .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
+
+                if (tellimus == null)
+                {
+                    result.AddError("Cannot find order with ID " + request.Id);
+                    return result;
+                }
+            }
 
             tellimus.OrderDate = request.OrderDate;
             tellimus.Status = request.Status;
@@ -45,7 +67,7 @@ namespace KooliProjekt.Application.Features.Tellimused
                 rida.VatAmount = ridaDto.VatAmount;
             }
 
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
             return result;
         }
     }

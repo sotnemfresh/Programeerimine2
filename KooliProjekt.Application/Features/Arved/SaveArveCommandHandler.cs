@@ -12,16 +12,37 @@ namespace KooliProjekt.Application.Features.Arved
 
         public SaveArveCommandHandler(ApplicationDbContext dbContext)
         {
+            if (dbContext == null) throw new System.ArgumentNullException(nameof(dbContext));
             _dbContext = dbContext;
         }
 
         public async Task<OperationResult> Handle(SaveArveCommand request, CancellationToken cancellationToken)
         {
+            if (request == null) throw new System.ArgumentNullException(nameof(request));
+
             var result = new OperationResult();
-            var arve = request.Id == 0 ? new Arve() : await _dbContext.Arved.FindAsync(request.Id);
+            if (request.Id < 0)
+            {
+                result.AddError("Request ID cannot be negative");
+                return result;
+            }
+
+            Arve arve;
 
             if (request.Id == 0)
-                await _dbContext.Arved.AddAsync(arve);
+            {
+                arve = new Arve();
+                await _dbContext.Arved.AddAsync(arve, cancellationToken);
+            }
+            else
+            {
+                arve = await _dbContext.Arved.FindAsync(request.Id);
+                if (arve == null)
+                {
+                    result.AddError("Cannot find invoice with ID " + request.Id);
+                    return result;
+                }
+            }
 
             arve.InvoiceNumber = request.InvoiceNumber;
             arve.InvoiceDate = request.InvoiceDate;
@@ -34,7 +55,7 @@ namespace KooliProjekt.Application.Features.Arved
             arve.KlientId = request.KlientId;
             arve.TellimusId = request.TellimusId;
 
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
             return result;
         }
     }

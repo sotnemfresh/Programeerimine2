@@ -12,6 +12,10 @@ namespace KooliProjekt.Application.Features.Kliendid
 
         public SaveKlientCommandHandler(ApplicationDbContext dbContext)
         {
+            if (dbContext == null)
+            {
+                throw new System.ArgumentNullException(nameof(dbContext));
+            }
             _dbContext = dbContext;
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
@@ -14,16 +15,23 @@ namespace KooliProjekt.Application.Features.Arved
 
         public DeleteArveCommandHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult> Handle(DeleteArveCommand request, CancellationToken cancellationToken)
         {
-            var result = new OperationResult();
+            if (request == null) throw new ArgumentNullException(nameof(request));
 
-            await _dbContext.Arved
-                .Where(a => a.Id == request.Id)
-                .ExecuteDeleteAsync();
+            var result = new OperationResult();
+            if (request.Id <= 0) return result;
+
+            var arve = await _dbContext.Arved
+                .FirstOrDefaultAsync(a => a.Id == request.Id, cancellationToken);
+
+            if (arve == null) return result;
+
+            _dbContext.Arved.Remove(arve);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return result;
         }

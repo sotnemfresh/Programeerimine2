@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
@@ -14,32 +15,33 @@ namespace KooliProjekt.Application.Features.Kliendid
 
         public DeleteKlientCommandHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult> Handle(DeleteKlientCommand request, CancellationToken cancellationToken)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
             var result = new OperationResult();
 
-            // 1. Delete all TellimusedRida (order line items) for this client's orders
-            await _dbContext.TellimusedRida
-                .Where(tr => tr.Tellimus.KlientId == request.Id)
-                .ExecuteDeleteAsync();
+            if (request.Id <= 0)
+            {
+                return result;
+            }
 
-            // 2. Delete all Arved (invoices) for this client
-            await _dbContext.Arved
-                .Where(a => a.KlientId == request.Id)
-                .ExecuteDeleteAsync();
+            var klient = await _dbContext.Kliendid
+                .FirstOrDefaultAsync(k => k.Id == request.Id, cancellationToken);
 
-            // 3. Delete all Tellimused (orders) for this client
-            await _dbContext.Tellimused
-                .Where(t => t.KlientId == request.Id)
-                .ExecuteDeleteAsync();
+            if (klient == null)
+            {
+                return result;
+            }
 
-            // 4. Finally, delete the Klient
-            await _dbContext.Kliendid
-                .Where(k => k.Id == request.Id)
-                .ExecuteDeleteAsync();
+            _dbContext.Kliendid.Remove(klient);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return result;
         }

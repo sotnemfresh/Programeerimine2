@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
@@ -14,16 +15,23 @@ namespace KooliProjekt.Application.Features.TellimuseRead
 
         public DeleteTellimuseReadCommandHandler(ApplicationDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
         public async Task<OperationResult> Handle(DeleteTellimuseReadCommand request, CancellationToken cancellationToken)
         {
-            var result = new OperationResult();
+            if (request == null) throw new ArgumentNullException(nameof(request));
 
-            await _dbContext.TellimusedRida
-                .Where(r => r.Id == request.Id)
-                .ExecuteDeleteAsync();
+            var result = new OperationResult();
+            if (request.Id <= 0) return result;
+
+            var rida = await _dbContext.TellimusedRida
+                .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
+
+            if (rida == null) return result;
+
+            _dbContext.TellimusedRida.Remove(rida);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
             return result;
         }

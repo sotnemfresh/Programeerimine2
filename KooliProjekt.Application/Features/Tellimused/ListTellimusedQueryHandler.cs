@@ -1,46 +1,33 @@
-using KooliProjekt.Application.Data;
-using KooliProjekt.Application.Infrastructure.Paging;
-using KooliProjekt.Application.Infrastructure.Results;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Dto;
+using KooliProjekt.Application.Infrastructure.Paging;
+using KooliProjekt.Application.Infrastructure.Results;
+using KooliProjekt.Application.Data.Repositories; 
+using MediatR;
+
 
 namespace KooliProjekt.Application.Features.Tellimused
 {
     public class ListTellimusedQueryHandler : IRequestHandler<ListTellimusedQuery, OperationResult<PagedResult<TellimusListDto>>>
     {
-        private readonly ApplicationDbContext _dbContext;
+        // Asenda ApplicationDbContext ITellimusRepository-ga
+        private readonly ITellimusRepository _tellimusRepository;
 
-        public ListTellimusedQueryHandler(ApplicationDbContext dbContext)
+        // Uuenda konstruktor
+        public ListTellimusedQueryHandler(ITellimusRepository tellimusRepository)
         {
-            _dbContext = dbContext;
+            _tellimusRepository = tellimusRepository;
         }
 
-public async Task<OperationResult<PagedResult<TellimusListDto>>> Handle(ListTellimusedQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<PagedResult<TellimusListDto>>> Handle(ListTellimusedQuery request, CancellationToken cancellationToken)
         {
-            var result = new OperationResult<PagedResult<TellimusListDto>>();
+            // Kutsuge välja spetsiaalne repositori meetod, mis teeb kogu LINQ töö
+            var pagedDtoResult = await _tellimusRepository.GetPagedListAsync(request.Page, request.PageSize);
 
-            var query = _dbContext.Tellimused
-                .Include(t => t.Klient)
-                .Include(t => t.TellimuseRead)
-                .OrderByDescending(t => t.OrderDate)
-                .Select(t => new TellimusListDto
-                {
-                    Id = t.Id,
-                    OrderDate = t.OrderDate,
-                    Status = t.Status,
-                    KlientFirstName = t.Klient.FirstName,
-                    KlientLastName = t.Klient.LastName,
-                    RidadeArv = t.TellimuseRead.Count
-                })
-                .AsQueryable();
-
-            result.Value = await query.GetPagedAsync(request.Page, request.PageSize);
-
-            return result;
+            // Tagastage edukas tulemus
+            return OperationResult<PagedResult<TellimusListDto>>.Success(pagedDtoResult);
         }
     }
 }

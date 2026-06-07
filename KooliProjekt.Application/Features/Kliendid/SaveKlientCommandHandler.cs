@@ -1,6 +1,7 @@
-﻿using System.Threading;
+﻿﻿using System.Threading;
 using System.Threading.Tasks;
-using KooliProjekt.Application.Data;
+using KooliProjekt.Application.Data; 
+using KooliProjekt.Application.Data.Repositories; 
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
 
@@ -8,29 +9,47 @@ namespace KooliProjekt.Application.Features.Kliendid
 {
     public class SaveKlientCommandHandler : IRequestHandler<SaveKlientCommand, OperationResult>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IKlientRepository _klientRepository;
 
-        public SaveKlientCommandHandler(ApplicationDbContext dbContext)
+        public SaveKlientCommandHandler(IKlientRepository klientRepository)
         {
-            _dbContext = dbContext;
+            _klientRepository = klientRepository;
         }
 
         public async Task<OperationResult> Handle(SaveKlientCommand request, CancellationToken cancellationToken)
         {
-            var result = new OperationResult();
+            Klient klientEntity;
 
-            var klient = request.Id == 0 ? new Klient() : await _dbContext.Kliendid.FindAsync(request.Id);
-            if (request.Id == 0) await _dbContext.Kliendid.AddAsync(klient);
+            if (request.Id == 0)
+            {
 
-            klient.FirstName = request.FirstName;
-            klient.LastName = request.LastName;
-            klient.Address = request.Address;
-            klient.Email = request.Email;
-            klient.Phone = request.Phone;
-            klient.Discount = request.Discount;
+                klientEntity = new Klient();
+            }
+            else
+            {
+                // Olemasoleva kliendi leidmine (kasutades Repository meetodit)
+                klientEntity = await _klientRepository.GetByIdAsync(request.Id);
 
-            await _dbContext.SaveChangesAsync();
-            return result;
+                if (klientEntity == null)
+                {
+                    // Kui klienti ei leitud, tagasta veateade
+                    return OperationResult.Failure($"Klienti ID {request.Id} ei leitud.");
+                }
+            }
+
+            // Mapime Command'i väärtused Entity'sse
+            klientEntity.FirstName = request.FirstName;
+            klientEntity.LastName = request.LastName;
+            klientEntity.Address = request.Address;
+            klientEntity.Email = request.Email;
+            klientEntity.Phone = request.Phone;
+            klientEntity.Discount = request.Discount;
+
+            // Kasutame Repository.SaveAsync(), mis tegeleb Add/Update/SaveChangesAsync()
+            await _klientRepository.SaveAsync(klientEntity);
+
+            // Tagastame eduka tulemuse
+            return OperationResult.Success();
         }
     }
 }

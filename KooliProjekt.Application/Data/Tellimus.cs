@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace KooliProjekt.Application.Data
 {
-    public class Tellimus
+    public class Tellimus : Entity
     {
         public int Id { get; set; }
 

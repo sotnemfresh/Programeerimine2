@@ -1,52 +1,61 @@
-﻿using System.Linq;
+﻿﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Data;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using KooliProjekt.Application.Data.Repositories;
 
 namespace KooliProjekt.Application.Features.Tellimused
 {
     public class SaveTellimusCommandHandler : IRequestHandler<SaveTellimusCommand, OperationResult>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ITellimusRepository _tellimusRepository;
 
-        public SaveTellimusCommandHandler(ApplicationDbContext dbContext)
+        // Lisame IKlientRepository, et kontrollida KlientId olemasolu
+        private readonly IKlientRepository _klientRepository;
+
+        public SaveTellimusCommandHandler(ITellimusRepository tellimusRepository, IKlientRepository klientRepository)
         {
-            _dbContext = dbContext;
+            _tellimusRepository = tellimusRepository;
+            _klientRepository = klientRepository;
         }
 
         public async Task<OperationResult> Handle(SaveTellimusCommand request, CancellationToken cancellationToken)
         {
-            var result = new OperationResult();
-            var tellimus = request.Id == 0 ? new Tellimus() : await _dbContext.Tellimused
-                .Include(t => t.TellimuseRead)
-                .FirstOrDefaultAsync(t => t.Id == request.Id);
-
-            if (request.Id == 0)
-                await _dbContext.Tellimused.AddAsync(tellimus);
-
-            tellimus.OrderDate = request.OrderDate;
-            tellimus.Status = request.Status;
-            tellimus.KlientId = request.KlientId;
-
-            // Update or add TellimuseRead
-            foreach (var ridaDto in request.TellimuseRead)
+            // 1. Kontrolli KlientId olemasolu
+            if (request.KlientId != 0 && await _klientRepository.GetByIdAsync(request.KlientId) == null)
             {
-                var rida = tellimus.TellimuseRead.FirstOrDefault(tr => tr.Id == ridaDto.Id) ?? new TellimuseRida();
-                if (rida.Id == 0) tellimus.TellimuseRead.Add(rida);
-
-                rida.ToodeId = ridaDto.ToodeId;
-                rida.Quantity = ridaDto.Quantity;
-                rida.UnitPrice = ridaDto.UnitPrice;
-                rida.LineTotal = ridaDto.LineTotal;
-                rida.VatRate = ridaDto.VatRate;
-                rida.VatAmount = ridaDto.VatAmount;
+                return OperationResult.Failure($"Klienti ID {request.KlientId} ei leitud.");
             }
 
-            await _dbContext.SaveChangesAsync();
-            return result;
+            Tellimus tellimus;
+
+            if (request.Id == 0)
+            {
+                // Uus tellimus
+                tellimus = new Tellimus();
+            }
+            else
+            {
+                // Olemasolev tellimus: laeme sisse READ, et neid saaks muuta
+                tellimus = await _tellimusRepository.GetByIdAsync(request.Id);
+
+                if (tellimus == null)
+                {
+                    return OperationResult.Failure($"Tellimust ID {request.Id} ei leitud.");
+                }
+
+                // Eraldi laeme Read sisse, kui need pole veel laetud (BaseRepository.GetByIdAsync ei tee Include'i)
+                await _tellimusRepository.LoadTellimuseReadAsync(tellimus);
+            }
+
+            // 2. Kutsuge välja spetsiaalne repositori meetod, mis teeb kogu töö (SaveTellimusDetailsAsync)
+            await _tellimusRepository.SaveTellimusDetailsAsync(tellimus, request);
+
+            // 3. Tagasta edukas tulemus
+            return OperationResult.Success();
         }
     }
 }

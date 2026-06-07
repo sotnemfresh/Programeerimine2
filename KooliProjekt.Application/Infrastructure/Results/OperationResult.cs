@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿﻿using System.Collections.Generic;
 
 namespace KooliProjekt.Application.Infrastructure.Results
 {
@@ -7,7 +7,7 @@ namespace KooliProjekt.Application.Infrastructure.Results
         public IDictionary<string, string> PropertyErrors { get; private set; }
         public IList<string> Errors { get; private set; }
 
-        public bool HasErrors 
+        public bool HasErrors
         {
             get
             {
@@ -19,6 +19,19 @@ namespace KooliProjekt.Application.Infrastructure.Results
         public bool ShouldSerializeHasErrors()
         {
             return HasErrors;
+        }
+
+        public static OperationResult Success()
+        {
+            return new OperationResult();
+        }
+
+
+        public static OperationResult Failure(string error)
+        {
+            var result = new OperationResult();
+            result.AddError(error);
+            return result;
         }
 
         public OperationResult AddError(string error)

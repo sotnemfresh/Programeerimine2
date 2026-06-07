@@ -1,4 +1,4 @@
-﻿namespace KooliProjekt.Application.Infrastructure.Results
+﻿﻿namespace KooliProjekt.Application.Infrastructure.Results
 {
     public class OperationResult<T> : OperationResult
     {
@@ -23,6 +23,18 @@
             base.AddPropertyError(propertyName, error);
 
             return this;
+        }
+
+        public static OperationResult<T> Success(T value)
+        {
+            return new OperationResult<T>(value); // Kasutab ülemist konstruktorit
+        }
+
+        public static OperationResult<T> Failure(string error)
+        {
+            var result = new OperationResult<T>();
+            result.AddError(error); // Kasutab baasklassi meetodit
+            return result;
         }
     }
 }

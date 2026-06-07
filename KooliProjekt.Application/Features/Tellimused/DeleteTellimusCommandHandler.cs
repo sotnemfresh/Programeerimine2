@@ -1,31 +1,41 @@
-﻿using System.Linq;
+﻿﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using KooliProjekt.Application.Data;
+using KooliProjekt.Application.Data; 
 using KooliProjekt.Application.Infrastructure.Results;
+using KooliProjekt.Application.Data.Repositories;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore; 
 
 namespace KooliProjekt.Application.Features.Tellimused
 {
     public class DeleteTellimusCommandHandler : IRequestHandler<DeleteTellimusCommand, OperationResult>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ITellimusRepository _tellimusRepository;
 
-        public DeleteTellimusCommandHandler(ApplicationDbContext dbContext)
+        public DeleteTellimusCommandHandler(ITellimusRepository tellimusRepository)
         {
-            _dbContext = dbContext;
+            _tellimusRepository = tellimusRepository;
         }
 
         public async Task<OperationResult> Handle(DeleteTellimusCommand request, CancellationToken cancellationToken)
         {
-            var result = new OperationResult();
+            // 1. Leia Tellimus ID järgi
+            // Kasutame BaseRepository meetodit GetByIdAsync<Tellimus>
+            var tellimusEntity = await _tellimusRepository.GetByIdAsync(request.Id);
 
-            await _dbContext.Tellimused
-                .Where(t => t.Id == request.Id)
-                .ExecuteDeleteAsync();
+            if (tellimusEntity == null)
+            {
+                // Kui tellimust ei leitud, tagastame veateate
+                return OperationResult.Failure($"Tellimust ID {request.Id} ei leitud, kustutamine ebaõnnestus.");
+            }
 
-            return result;
+            // 2. Kustuta Tellimus Repository kaudu
+            // Repository tegeleb SaveChangesAsync()
+            await _tellimusRepository.DeleteAsync(tellimusEntity);
+
+            // 3. Tagasta edukas tulemus
+            return OperationResult.Success();
         }
     }
 }

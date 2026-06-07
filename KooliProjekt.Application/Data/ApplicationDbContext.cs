@@ -1,5 +1,4 @@
 ﻿﻿using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace KooliProjekt.Application.Data
 {

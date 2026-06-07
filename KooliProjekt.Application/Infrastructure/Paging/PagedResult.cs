@@ -1,14 +1,15 @@
-﻿using System.Collections.Generic;
+﻿﻿using System.Collections.Generic;
+using System;
 
 namespace KooliProjekt.Application.Infrastructure.Paging
 {
-    public class PagedResult<T> : PagedResultBase
+    public class PagedResult<T>
     {
-        public IList<T> Results { get; set; }
-
-        public PagedResult()
-        {
-            Results = new List<T>();
-        }
+        // PROPERTID, mida kasutab PagingExtensions.cs
+        public List<T> Results { get; set; } 
+        public int CurrentPage { get; set; } 
+        public int RowCount { get; set; } 
+        public int PageSize { get; set; }
+        public int PageCount { get; set; } 
     }
 }

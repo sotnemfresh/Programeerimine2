@@ -2,7 +2,7 @@
 
 namespace KooliProjekt.Application.Data
 {
-    public class Toode
+    public class Toode : Entity
     {
         public int Id { get; set; }
 

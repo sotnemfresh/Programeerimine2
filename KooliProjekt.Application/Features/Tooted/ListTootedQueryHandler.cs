@@ -1,41 +1,30 @@
-﻿using KooliProjekt.Application.Data;
-using KooliProjekt.Application.Infrastructure.Paging;
-using KooliProjekt.Application.Infrastructure.Results;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
+﻿﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Dto;
+using KooliProjekt.Application.Infrastructure.Paging;
+using KooliProjekt.Application.Infrastructure.Results;
+using KooliProjekt.Application.Data.Repositories; 
+using MediatR;
 namespace KooliProjekt.Application.Features.Tooted
 {
     public class ListTootedQueryHandler : IRequestHandler<ListTootedQuery, OperationResult<PagedResult<ToodeListDto>>>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IToodeRepository _toodeRepository;
 
-        public ListTootedQueryHandler(ApplicationDbContext dbContext)
+        // Uuenda konstruktor
+        public ListTootedQueryHandler(IToodeRepository toodeRepository)
         {
-            _dbContext = dbContext;
+            _toodeRepository = toodeRepository;
         }
 
         public async Task<OperationResult<PagedResult<ToodeListDto>>> Handle(ListTootedQuery request, CancellationToken cancellationToken)
         {
-            var result = new OperationResult<PagedResult<ToodeListDto>>();
+            // Kutsuge välja repositori meetod, mis teeb kogu töö
+            var pagedDtoResult = await _toodeRepository.GetPagedListAsync(request.Page, request.PageSize);
 
-            var query = _dbContext.Tooted
-                .OrderBy(t => t.Name)
-                .Select(t => new ToodeListDto
-                {
-                    Id = t.Id,
-                    Name = t.Name,
-                    FotoURL = t.FotoURL,
-                    Price = t.Price,
-                    StockQuantity = t.StockQuantity
-                });
-
-            result.Value = await query.GetPagedAsync(request.Page, request.PageSize);
-
-            return result;
+            // Tagastage edukas tulemus
+            return OperationResult<PagedResult<ToodeListDto>>.Success(pagedDtoResult);
         }
     }
 }

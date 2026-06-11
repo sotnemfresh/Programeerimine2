@@ -2,9 +2,11 @@
 using MediatR;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace KooliProjekt.Application.Features.Tellimused
 {
+[ExcludeFromCodeCoverage]
     public class SaveTellimusCommand : IRequest<OperationResult>
     {
         public int Id { get; set; }

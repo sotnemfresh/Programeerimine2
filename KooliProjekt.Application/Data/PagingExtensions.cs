@@ -3,9 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using KooliProjekt.Application.Infrastructure.Paging;
 using Microsoft.EntityFrameworkCore;
-
+using System.Diagnostics.CodeAnalysis;
 namespace KooliProjekt.Application.Data
 {
+[ExcludeFromCodeCoverage]
     public static class PagingExtensions
     {
         public static async Task<PagedResult<T>> GetPagedAsync<T>(this IQueryable<T> query, int page, int pageSize)

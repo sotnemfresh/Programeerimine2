@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics.CodeAnalysis;
 
 namespace KooliProjekt.Application.Behaviors
 {
+[ExcludeFromCodeCoverage]
     public class ErrorHandlingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TResponse : OperationResult, new()
     {
         private readonly ILogger<ErrorHandlingBehavior<TRequest, TResponse>> _logger;

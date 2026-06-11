@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using FluentValidation;
 using KooliProjekt.Application.Infrastructure.Results;
 using MediatR;
+using System.Diagnostics.CodeAnalysis;
 
 namespace KooliProjekt.Application.Behaviors
 {
+[ExcludeFromCodeCoverage]
     public class ValidationBehavior<TRequest, TResponse> : 
         IPipelineBehavior<TRequest, TResponse> where TResponse : OperationResult, new()
     {

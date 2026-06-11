@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
-
+using System.Diagnostics.CodeAnalysis;
 #nullable disable
 
 namespace KooliProjekt.Application.Migrations
 {
+[ExcludeFromCodeCoverage]
     /// <inheritdoc />
     public partial class Initial : Migration
     {

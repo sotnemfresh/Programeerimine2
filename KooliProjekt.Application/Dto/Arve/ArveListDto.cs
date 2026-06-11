@@ -1,9 +1,10 @@
 ﻿// KooliProjekt.Application/Dto/ArveListDto.cs
-
+using System.Diagnostics.CodeAnalysis;
 using System;
 
 namespace KooliProjekt.Application.Dto
 {
+[ExcludeFromCodeCoverage]
     public class ArveListDto
     {
         public int Id { get; set; }

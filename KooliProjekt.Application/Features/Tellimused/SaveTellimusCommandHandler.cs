@@ -21,8 +21,8 @@ namespace KooliProjekt.Application.Features.Tellimused
         public async Task<OperationResult> Handle(SaveTellimusCommand request, CancellationToken cancellationToken)
         {
             if (request == null) throw new System.ArgumentNullException(nameof(request));
-            var result = new OperationResult();
 
+            var result = new OperationResult();
             if (request.Id < 0)
             {
                 result.AddError("Request ID cannot be negative");
@@ -53,18 +53,18 @@ namespace KooliProjekt.Application.Features.Tellimused
             tellimus.Status = request.Status;
             tellimus.KlientId = request.KlientId;
 
-            // Update or add TellimuseRead
-            foreach (var ridaDto in request.TellimuseRead)
+            if (request.TellimuseRead != null)
             {
-                var rida = tellimus.TellimuseRead.FirstOrDefault(tr => tr.Id == ridaDto.Id) ?? new TellimuseRida();
-                if (rida.Id == 0) tellimus.TellimuseRead.Add(rida);
+                foreach (var ridaDto in request.TellimuseRead)
+                {
+                    var rida = tellimus.TellimuseRead.FirstOrDefault(tr => tr.Id == ridaDto.Id) ?? new TellimuseRida();
+                    if (rida.Id == 0) tellimus.TellimuseRead.Add(rida);
 
-                rida.ToodeId = ridaDto.ToodeId;
-                rida.Quantity = ridaDto.Quantity;
-                rida.UnitPrice = ridaDto.UnitPrice;
-                rida.LineTotal = ridaDto.LineTotal;
-                rida.VatRate = ridaDto.VatRate;
-                rida.VatAmount = ridaDto.VatAmount;
+                    rida.ToodeId = ridaDto.ToodeId;
+                    rida.Quantity = ridaDto.Quantity;
+                    rida.UnitPrice = ridaDto.UnitPrice;
+                    rida.LineTotal = ridaDto.LineTotal;
+                }
             }
 
             await _dbContext.SaveChangesAsync(cancellationToken);

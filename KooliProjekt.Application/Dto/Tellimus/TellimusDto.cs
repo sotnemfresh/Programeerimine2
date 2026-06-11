@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace KooliProjekt.Application.Dto
 {
+[ExcludeFromCodeCoverage]
     // Kasutatakse detailvaates (GetQuery)
     public class TellimusDto
     {

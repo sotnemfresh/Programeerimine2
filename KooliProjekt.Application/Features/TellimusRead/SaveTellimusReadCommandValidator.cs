@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
+using System.Diagnostics.CodeAnalysis;
 
 namespace KooliProjekt.Application.Features.TellimuseRead
 {
+[ExcludeFromCodeCoverage]
     public class SaveTellimuseReadCommandValidator : AbstractValidator<SaveTellimuseReadCommand>
     {
         public SaveTellimuseReadCommandValidator()

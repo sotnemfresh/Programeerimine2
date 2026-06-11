@@ -1,5 +1,7 @@
-﻿namespace KooliProjekt.Application.Dto
+﻿using System.Diagnostics.CodeAnalysis;
+namespace KooliProjekt.Application.Dto
 {
+[ExcludeFromCodeCoverage]
     public class ToodeListDto
     {
         public int Id { get; set; }

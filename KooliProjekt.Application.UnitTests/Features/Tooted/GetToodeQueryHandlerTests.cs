@@ -12,7 +12,7 @@ namespace KooliProjekt.UnitTests.Features.Tooted
     public class GetToodeQueryHandlerTests : ServiceTestBase
     {
         [Fact]
-        public void Constructor_should_throw_if_dbContext_is_null()
+        public void Constructor_should_throw_if_dbcontext_is_null()
         {
             Assert.Throws<ArgumentNullException>(() => new GetToodeQueryHandler(null));
         }
@@ -35,6 +35,52 @@ namespace KooliProjekt.UnitTests.Features.Tooted
 
             var result = await handler.Handle(query, CancellationToken.None);
 
+            Assert.NotNull(result);
+            Assert.Null(result.Value);
+        }
+
+        [Fact]
+        public async Task Handle_should_return_toode_when_valid_id_is_provided()
+        {
+            // Arrange
+            var toode = new Toode
+            {
+                Name = "Test Product",
+                Description = "Test Description",
+                FotoURL = "http://example.com/photo.jpg",
+                Price = 99.99m,
+                StockQuantity = 50
+            };
+            await DbContext.Tooted.AddAsync(toode);
+            await DbContext.SaveChangesAsync();
+
+            var query = new GetToodeQuery { Id = toode.Id };
+            var handler = new GetToodeQueryHandler(DbContext);
+
+            // Act
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.NotNull(result.Value);
+            Assert.Equal(toode.Id, result.Value.Id);
+            Assert.Equal("Test Product", result.Value.Name);
+            Assert.Equal("Test Description", result.Value.Description);
+            Assert.Equal(99.99m, result.Value.Price);
+            Assert.Equal(50, result.Value.StockQuantity);
+        }
+
+        [Fact]
+        public async Task Handle_should_return_null_when_toode_does_not_exist()
+        {
+            // Arrange
+            var query = new GetToodeQuery { Id = 9999 };
+            var handler = new GetToodeQueryHandler(DbContext);
+
+            // Act
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            // Assert
             Assert.NotNull(result);
             Assert.Null(result.Value);
         }

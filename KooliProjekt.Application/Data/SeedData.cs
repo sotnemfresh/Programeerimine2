@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq;
-
+using System.Diagnostics.CodeAnalysis;
 namespace KooliProjekt.Application.Data
 {
+[ExcludeFromCodeCoverage]
     /// <summary>
     /// Testandmete generaator
     /// Genereerib andmed ainult siis kui vajalik tabel on tühi.

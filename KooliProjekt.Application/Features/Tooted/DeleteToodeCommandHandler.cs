@@ -30,6 +30,16 @@ namespace KooliProjekt.Application.Features.Tooted
 
             if (toode == null) return result;
 
+            // Remove dependent order lines referencing this product so the product can be deleted
+            var dependentRows = await _dbContext.TellimusedRida
+                .Where(r => r.ToodeId == request.Id)
+                .ToListAsync(cancellationToken);
+
+            if (dependentRows.Any())
+            {
+                _dbContext.TellimusedRida.RemoveRange(dependentRows);
+            }
+
             _dbContext.Tooted.Remove(toode);
             await _dbContext.SaveChangesAsync(cancellationToken);
 

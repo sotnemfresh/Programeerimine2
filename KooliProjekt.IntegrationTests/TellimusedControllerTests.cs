@@ -76,5 +76,124 @@ namespace KooliProjekt.IntegrationTests
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
+
+        // ===== DELETE =====
+
+        [Fact]
+        public async Task Delete_should_remove_existing_tellimus()
+        {
+            // Arrange
+            var klient = new Klient { FirstName = "Test", LastName = "User", Email = "test@test.ee" };
+            await DbContext.Kliendid.AddAsync(klient);
+            await DbContext.SaveChangesAsync();
+
+            var tellimus = new Tellimus
+            {
+                OrderDate = DateTime.Now,
+                Status = "Pending",
+                KlientId = klient.Id
+            };
+            await DbContext.Tellimused.AddAsync(tellimus);
+            await DbContext.SaveChangesAsync();
+
+            var url = "/api/Tellimused/Delete/";
+
+            // Act
+            using var request = new HttpRequestMessage(HttpMethod.Delete, url)
+            {
+                Content = JsonContent.Create(new { id = tellimus.Id })
+            };
+            using var response = await Client.SendAsync(request);
+            var tellimusFromDb = await DbContext.Tellimused
+           .Where(t => t.Id == tellimus.Id)
+          .FirstOrDefaultAsync();
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            Assert.Null(tellimusFromDb);
+            var result = await response.Content.ReadFromJsonAsync<OperationResult>();
+            Assert.False(result.HasErrors);
+        }
+
+        [Fact]
+        public async Task Delete_should_work_with_missing_tellimus()
+        {
+            // Arrange
+            var url = "/api/Tellimused/Delete/";
+
+            // Act
+            using var request = new HttpRequestMessage(HttpMethod.Delete, url)
+            {
+                Content = JsonContent.Create(new { id = 9999 })
+            };
+            using var response = await Client.SendAsync(request);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<OperationResult>();
+            Assert.False(result.HasErrors);
+        }
+
+        // ===== SAVE =====
+
+        [Fact]
+        public async Task Save_should_add_new_tellimus()
+        {
+            // Arrange
+            var klient = new Klient { FirstName = "Test", LastName = "User", Email = "test@test.ee" };
+            await DbContext.Kliendid.AddAsync(klient);
+            await DbContext.SaveChangesAsync();
+
+            var url = "/api/Tellimused/Save/";
+            var command = new SaveTellimusCommand
+            {
+                OrderDate = DateTime.Now,
+                Status = "Pending",
+                KlientId = klient.Id
+            };
+
+            // Act
+            using var response = await Client.PostAsJsonAsync(url, command);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<OperationResult>();
+            Assert.False(result.HasErrors);
+        }
+
+        [Fact]
+        public async Task Save_should_work_with_missing_tellimus()
+        {
+            // Arrange
+            var url = "/api/Tellimused/Save/";
+            var command = new SaveTellimusCommand { Id = 9999, Status = "Pending" };
+
+            // Act
+            using var response = await Client.PostAsJsonAsync(url, command);
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.NotNull(content);
+            Assert.Contains("error", content.ToLower());
+        }
+
+        [Fact]
+        public async Task Save_should_work_with_invalid_tellimus()
+        {
+            // Arrange
+            var url = "/api/Tellimused/Save/";
+            var command = new SaveTellimusCommand { Id = 0, Status = "" };
+
+            // Act
+            using var response = await Client.PostAsJsonAsync(url, command);
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.NotNull(content);
+            Assert.True(
+              response.StatusCode == HttpStatusCode.BadRequest || content.Contains("error", System.StringComparison.OrdinalIgnoreCase),
+           $"Expected error response but got {response.StatusCode}: {content}"
+             );
+        }
     }
 }

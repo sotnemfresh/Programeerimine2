@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KooliProjekt.IntegrationTests.Helpers
 {
-    public class FakeStartup 
+    public class FakeStartup
     {
         public FakeStartup(IConfiguration configuration)
         {
@@ -26,9 +27,14 @@ namespace KooliProjekt.IntegrationTests.Helpers
         public virtual void ConfigureServices(IServiceCollection services)
         {
             var dbGuid = Guid.NewGuid().ToString();
+            var builder = new SqlConnectionStringBuilder(Configuration.GetConnectionString("TestConnection"))
+            {
+                InitialCatalog = $"aspnet-KooliProjekt-Integration-{dbGuid}"
+            };
+
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(Configuration.GetConnectionString("TestConnection"));
+                options.UseSqlServer(builder.ConnectionString);
             });
 
             var applicationAssembly = typeof(ErrorHandlingBehavior<,>).Assembly;

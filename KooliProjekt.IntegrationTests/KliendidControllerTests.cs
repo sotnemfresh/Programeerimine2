@@ -66,5 +66,98 @@ namespace KooliProjekt.IntegrationTests
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
+
+        // ===== DELETE =====
+
+        [Fact]
+        public async Task Delete_should_remove_existing_klient()
+        {
+            // Arrange
+            var klient = new Klient { FirstName = "Delete", LastName = "Me", Email = "del@test.ee" };
+            await DbContext.Kliendid.AddAsync(klient);
+            await DbContext.SaveChangesAsync();
+
+            var url = "/api/Kliendid/Delete/";
+
+            // Act
+            using var request = new HttpRequestMessage(HttpMethod.Delete, url)
+            {
+                Content = JsonContent.Create(new { id = klient.Id })
+            };
+            using var response = await Client.SendAsync(request);
+            var klientFromDb = await DbContext.Kliendid
+              .Where(k => k.Id == klient.Id)
+                         .FirstOrDefaultAsync();
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            Assert.Null(klientFromDb);
+            var result = await response.Content.ReadFromJsonAsync<OperationResult>();
+            Assert.False(result.HasErrors);
+        }
+
+        [Fact]
+        public async Task Delete_should_work_with_missing_klient()
+        {
+            // Arrange
+            var url = "/api/Kliendid/Delete/";
+
+            // Act
+            using var request = new HttpRequestMessage(HttpMethod.Delete, url)
+            {
+                Content = JsonContent.Create(new { id = 9999 })
+            };
+            using var response = await Client.SendAsync(request);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<OperationResult>();
+            Assert.False(result.HasErrors);
+        }
+
+        // ===== SAVE =====
+
+        [Fact]
+        public async Task Save_should_add_new_klient()
+        {
+            // Arrange
+            var url = "/api/Kliendid/Save/";
+            var command = new SaveKlientCommand
+            {
+                FirstName = "Uus",
+                LastName = "Klient",
+                Email = "uus@test.ee"
+            };
+
+            // Act
+            using var response = await Client.PostAsJsonAsync(url, command);
+            var klientFromDb = await DbContext.Kliendid
+            .Where(k => k.Email == "uus@test.ee").FirstOrDefaultAsync();
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            Assert.NotNull(klientFromDb);
+            var result = await response.Content.ReadFromJsonAsync<OperationResult>();
+            Assert.False(result.HasErrors);
+        }
+
+        [Fact]
+        public async Task Save_should_work_with_invalid_klient()
+        {
+            // Arrange
+            var url = "/api/Kliendid/Save/";
+            var command = new SaveKlientCommand { FirstName = "", LastName = "" };
+
+            // Act
+            using var response = await Client.PostAsJsonAsync(url, command);
+
+            // Assert
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.NotNull(content);
+            Assert.True(
+          response.StatusCode == HttpStatusCode.BadRequest || content.Contains("error", System.StringComparison.OrdinalIgnoreCase),
+       $"Expected error response but got {response.StatusCode}: {content}"
+             );
+        }
     }
 }

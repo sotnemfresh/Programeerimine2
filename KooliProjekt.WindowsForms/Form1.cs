@@ -1,12 +1,69 @@
 using System.Collections;
+using System.ComponentModel;
 using System.Net.Http.Json;
 using KooliProjekt.WindowsForms.Api;
 
 namespace KooliProjekt.WindowsForms
 {
-    public partial class Form1 : Form
+    public partial class Form1 : Form, IMainView
     {
         private readonly IApiClient _apiClient;
+        private MainViewPresenter _mainViewPresenter;
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public IList<Toode> DataSource
+        {
+            get { return (IList<Toode>)dataGridView1.DataSource; }
+            set { dataGridView1.DataSource = value; }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Toode? SelectedItem
+        {
+            get { return dataGridView1.CurrentRow?.DataBoundItem as Toode; }
+            set { }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public int CurrentId
+        {
+            get { return idField?.Text != null && int.TryParse(idField.Text, out int id) ? id : -1; }
+            set { if (idField != null) idField.Text = value.ToString(); }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string CurrentTitle
+        {
+            get { return titleField?.Text ?? string.Empty; }
+            set { if (titleField != null) titleField.Text = value; }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public string CurrentFotoUrl
+        {
+            get { return fotoUrlField?.Text ?? string.Empty; }
+            set { if (fotoUrlField != null) fotoUrlField.Text = value; }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public decimal CurrentPrice
+        {
+            get { return decimal.TryParse(priceField?.Text, out decimal price) ? price : 0; }
+            set { if (priceField != null) priceField.Text = value.ToString("0.00"); }
+        }
+
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public decimal CurrentStockQuantity
+        {
+            get { return decimal.TryParse(stockQuantityField?.Text, out decimal result) ? result : 0; }
+            set { if (stockQuantityField != null) stockQuantityField.Text = value.ToString("0.00"); }
+        }
+
+
+        public void SetPresenter(MainViewPresenter presenter)
+        {
+            _mainViewPresenter = presenter;
+        }
 
         public Form1(IApiClient apiClient)
         {
@@ -36,7 +93,7 @@ namespace KooliProjekt.WindowsForms
                 ShowError("Viga kustutamisel", result);
             }
 
-            await LoadTooted();
+            await _mainViewPresenter.LoadData();
         }
 
         private async void AddCommand_Click(object sender, EventArgs e)
@@ -63,7 +120,7 @@ namespace KooliProjekt.WindowsForms
                 return;
             }
 
-            await LoadTooted();
+            await _mainViewPresenter.LoadData();
         }
 
         private async void SaveCommand_Click(object sender, EventArgs e)
@@ -71,18 +128,21 @@ namespace KooliProjekt.WindowsForms
             var toode = new Toode();
             toode.Id = int.Parse(idField.Text);
             toode.Name = titleField.Text;
+            toode.FotoURL = fotoUrlField.Text;
+            toode.Price = decimal.TryParse(priceField.Text, out decimal price) ? price : 0;
+            toode.StockQuantity = decimal.TryParse(stockQuantityField.Text, out decimal stockQuantity) ? stockQuantity : 0;
 
             var result = await _apiClient.Save(toode);
             if (result.HasErrors)
             {
                 ShowError("Viga salvestamisel", result);
             }
-            await LoadTooted();
+            await _mainViewPresenter.LoadData();
         }
 
         // Koosta etteantud veateatest ja OperationResult sees olevatest vigadest
         // veateade ja näita seda kasutajale
-        private void ShowError(string message, OperationResult result)
+        public void ShowError(string message, OperationResult result)
         {
             var error = message + "\r\n";
             var apiErrors = "";
@@ -123,65 +183,18 @@ namespace KooliProjekt.WindowsForms
         {
             if (dataGridView1.CurrentRow == null)
             {
+                _mainViewPresenter.SetSelection(null);
                 return;
             }
 
             var selectedList = (Toode)dataGridView1.CurrentRow.DataBoundItem;
-            if (selectedList == null)
-            {
-                return;
-            }
-
-            idField.Text = selectedList.Id.ToString();
-            titleField.Text = selectedList.Name.ToString();
+            _mainViewPresenter.SetSelection(selectedList);
         }
+
 
         private async void Form1_Load(object sender, EventArgs e)
         {
-            await LoadTooted();
-        }
-
-        private async Task LoadTooted()
-        {
-            var response = await _apiClient.List(1, 100);
-
-            if (response == null)
-            {
-                var err = new OperationResult<PagedResult<Toode>>();
-                err.AddError("Server returned no response.");
-                ShowError("Viga andmete laadimisel", err);
-                dataGridView1.DataSource = null;
-                return;
-            }
-
-            if (response.HasErrors)
-            {
-                ShowError("Viga andmete laadimisel", response);
-                dataGridView1.DataSource = null;
-                return;
-            }
-
-            var results = response.Value?.Results;
-            if (results == null)
-            {
-                var err = new OperationResult<PagedResult<Toode>>();
-                err.AddError("Server returned no data.");
-                ShowError("Viga andmete laadimisel", err);
-                dataGridView1.DataSource = null;
-                return;
-            }
-
-            dataGridView1.DataSource = results;
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void titleField_TextChanged(object sender, EventArgs e)
-        {
-
+            await _mainViewPresenter.LoadData();
         }
     }
 }

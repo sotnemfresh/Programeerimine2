@@ -28,16 +28,29 @@
         /// </summary>
         private void InitializeComponent()
         {
+            titleField = new TextBox();
             dataGridView1 = new DataGridView();
             label1 = new Label();
             label2 = new Label();
             idField = new TextBox();
-            titleField = new TextBox();
             saveCommand = new Button();
             addCommand = new Button();
             deleteCommand = new Button();
+            fotoUrlField = new TextBox();
+            label3 = new Label();
+            priceField = new TextBox();
+            label4 = new Label();
+            stockQuantityField = new TextBox();
+            label5 = new Label();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
+            // 
+            // titleField
+            // 
+            titleField.Location = new Point(543, 79);
+            titleField.Name = "titleField";
+            titleField.Size = new Size(199, 23);
+            titleField.TabIndex = 4;
             // 
             // dataGridView1
             // 
@@ -77,14 +90,6 @@
             idField.TabIndex = 3;
             idField.Text = "-1";
             // 
-            // titleField
-            // 
-            titleField.Location = new Point(543, 79);
-            titleField.Name = "titleField";
-            titleField.Size = new Size(199, 23);
-            titleField.TabIndex = 4;
-            titleField.TextChanged += titleField_TextChanged;
-            // 
             // saveCommand
             // 
             saveCommand.Location = new Point(781, 167);
@@ -112,11 +117,65 @@
             deleteCommand.Text = "Kustuta";
             deleteCommand.UseVisualStyleBackColor = true;
             // 
+            // fotoUrlField
+            // 
+            fotoUrlField.Location = new Point(543, 135);
+            fotoUrlField.Name = "fotoUrlField";
+            fotoUrlField.Size = new Size(199, 23);
+            fotoUrlField.TabIndex = 9;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(543, 117);
+            label3.Name = "label3";
+            label3.Size = new Size(31, 15);
+            label3.TabIndex = 8;
+            label3.Text = "URL:";
+            // 
+            // priceField
+            // 
+            priceField.Location = new Point(543, 188);
+            priceField.Name = "priceField";
+            priceField.Size = new Size(199, 23);
+            priceField.TabIndex = 11;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(543, 170);
+            label4.Name = "label4";
+            label4.Size = new Size(36, 15);
+            label4.TabIndex = 10;
+            label4.Text = "Price:";
+            // 
+            // stockQuantityField
+            // 
+            stockQuantityField.Location = new Point(543, 242);
+            stockQuantityField.Name = "stockQuantityField";
+            stockQuantityField.Size = new Size(199, 23);
+            stockQuantityField.TabIndex = 13;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(543, 224);
+            label5.Name = "label5";
+            label5.Size = new Size(39, 15);
+            label5.TabIndex = 12;
+            label5.Text = "Stock:";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(895, 338);
+            Controls.Add(stockQuantityField);
+            Controls.Add(label5);
+            Controls.Add(priceField);
+            Controls.Add(label4);
+            Controls.Add(fotoUrlField);
+            Controls.Add(label3);
             Controls.Add(deleteCommand);
             Controls.Add(addCommand);
             Controls.Add(saveCommand);
@@ -144,5 +203,11 @@
         private Button saveCommand;
         private Button addCommand;
         private Button deleteCommand;
+        private TextBox fotoUrlField;
+        private Label label3;
+        private TextBox priceField;
+        private Label label4;
+        private TextBox stockQuantityField;
+        private Label label5;
     }
 }

@@ -79,65 +79,24 @@ namespace KooliProjekt.WindowsForms
 
         private async void DeleteCommand_Click(object sender, EventArgs e)
         {
-            var message = "Oled kindel, et soovid kustutada " + titleField.Text + "?";
-            var answer = MessageBox.Show(message, "Kustutamine", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (answer != DialogResult.Yes)
-            {
-                return;
-            }
-
-            var id = int.Parse(idField.Text);
-            var result = await _apiClient.Delete(id);
-            if (result.HasErrors)
-            {
-                ShowError("Viga kustutamisel", result);
-            }
-
-            await _mainViewPresenter.LoadData();
+            await _mainViewPresenter.Delete();
         }
 
         private async void AddCommand_Click(object sender, EventArgs e)
         {
-            // Create a new empty product immediately and refresh the list
-            var toode = new Toode
-            {
-                Id = 0,
-                Name = titleField.Text ?? string.Empty
-            };
-
-            var result = await _apiClient.Save(toode);
-            if (result == null)
-            {
-                var err = new OperationResult();
-                err.AddError("Server returned no response.");
-                ShowError("Viga lisamisel", err);
-                return;
-            }
-
-            if (result.HasErrors)
-            {
-                ShowError("Viga lisamisel", result);
-                return;
-            }
-
-            await _mainViewPresenter.LoadData();
+            await _mainViewPresenter.Add();
         }
 
         private async void SaveCommand_Click(object sender, EventArgs e)
         {
-            var toode = new Toode();
-            toode.Id = int.Parse(idField.Text);
-            toode.Name = titleField.Text;
-            toode.FotoURL = fotoUrlField.Text;
-            toode.Price = decimal.TryParse(priceField.Text, out decimal price) ? price : 0;
-            toode.StockQuantity = decimal.TryParse(stockQuantityField.Text, out decimal stockQuantity) ? stockQuantity : 0;
+            await _mainViewPresenter.Save();
+        }
 
-            var result = await _apiClient.Save(toode);
-            if (result.HasErrors)
-            {
-                ShowError("Viga salvestamisel", result);
-            }
-            await _mainViewPresenter.LoadData();
+        public bool ConfirmDelete()
+        {
+            var message = "Oled kindel, et soovid kustutada " + titleField.Text + "?";
+            var answer = MessageBox.Show(message, "Kustutamine", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            return (answer == DialogResult.Yes);
         }
 
         // Koosta etteantud veateatest ja OperationResult sees olevatest vigadest

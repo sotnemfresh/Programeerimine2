@@ -15,5 +15,6 @@ namespace KooliProjekt.WindowsForms
         string CurrentFotoUrl { get; set; }
         decimal CurrentPrice { get; set; }
         decimal CurrentStockQuantity { get; set; }
+        bool ConfirmDelete();
     }
 }

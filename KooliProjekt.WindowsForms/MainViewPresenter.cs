@@ -63,6 +63,7 @@ namespace KooliProjekt.WindowsForms
             if (result.HasErrors)
             {
                 _mainView.ShowError("Viga salvestamisel", result);
+                return;
             }
             await LoadData();
         }
@@ -96,18 +97,16 @@ namespace KooliProjekt.WindowsForms
 
         public async Task Delete()
         {
-            var message = "Oled kindel, et soovid kustutada " + _mainView.CurrentTitle + "?";
-            var answer = MessageBox.Show(message, "Kustutamine", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (answer != DialogResult.Yes)
+            if (!_mainView.ConfirmDelete())
             {
                 return;
             }
 
-            var id = _mainView.CurrentId;
-            var result = await _apiClient.Delete(id);
+            var result = await _apiClient.Delete(_mainView.CurrentId);
             if (result.HasErrors)
             {
                 _mainView.ShowError("Viga kustutamisel", result);
+                return;
             }
 
             await LoadData();

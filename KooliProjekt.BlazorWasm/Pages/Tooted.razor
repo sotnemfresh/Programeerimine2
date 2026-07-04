@@ -1,0 +1,54 @@
+﻿@page "/tooted"
+@inject IApiClient apiClient
+
+<PageTitle>Tooted</PageTitle>
+
+<h1>Tooted</h1>
+
+@if (TootedList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>FotoURL</th>
+                <th>Price</th>
+                <th>StockQuantity</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var Toode in TootedList)
+            {
+                <tr>
+                    <td>@Toode.Id</td>
+                    <td>@Toode.Name</td>
+                    <td>@Toode.Description</td>
+                    <td>@Toode.FotoURL</td>
+                    <td>@Toode.Price</td>
+                    <td>@Toode.StockQuantity</td>
+                    <td>
+                        <button class="btn btn-success">Edit</button>
+                        <button class="btn btn-danger">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IList<Toode> TootedList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await apiClient.List(1, 100);
+        TootedList = result.Value.Results;
+    }
+}

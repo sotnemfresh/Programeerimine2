@@ -28,6 +28,7 @@ namespace KooliProjekt.WebAPI
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddCors();
 
             var applicationAssembly = typeof(ErrorHandlingBehavior<,>).Assembly;
             builder.Services.AddValidatorsFromAssembly(applicationAssembly);
@@ -47,6 +48,11 @@ namespace KooliProjekt.WebAPI
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors(
+                options => options.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod());
 
             app.UseAuthorization();
 

@@ -12,7 +12,7 @@ namespace KooliProjekt.WpfApplication
             InitializeComponent();
             var viewModel = new MainWindowViewModel();
             DataContext = viewModel;
-            Loaded += async (s, e) => await viewModel.LoadDataAsync();
+            Loaded += async (s, e) => await viewModel.LoadData();
         }
     }
 }

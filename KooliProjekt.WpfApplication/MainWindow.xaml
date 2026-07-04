@@ -13,6 +13,7 @@
         </Grid.ColumnDefinitions>
         
         <DataGrid x:Name="ToodeDataGrid" 
+                  CanUserAddRows="False"
                   Grid.Column="0"
                   AutoGenerateColumns="True"
                   ItemsSource="{Binding Data}"

@@ -7,6 +7,8 @@
 <h3>@title</h3>
 
 <EditForm EditContext="editContext" OnValidSubmit="@FormSubmitted">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
     <p class="alert-danger">@error</p>
     <div class="form-group row">
         <label class="col-ms-2 col-form-label">ID</label>
@@ -18,30 +20,35 @@
         <label class="col-ms-2 col-form-label">Name</label>
         <div class="col-sm-10">
             <InputText class="form-control" @bind-Value="toode.Name" />
+            <ValidationMessage For="@(() => toode.Name)" />
         </div>
     </div>
     <div class="form-group row">
         <label class="col-ms-2 col-form-label">Description</label>
         <div class="col-sm-10">
             <InputText class="form-control" @bind-Value="toode.Description" />
+            <ValidationMessage For="@(() => toode.Description)" />
         </div>
     </div>
     <div class="form-group row">
         <label class="col-ms-2 col-form-label">Foto URL</label>
         <div class="col-sm-10">
             <InputText class="form-control" @bind-Value="toode.FotoURL" />
+            <ValidationMessage For="@(() => toode.FotoURL)" />
         </div>
     </div>
     <div class="form-group row">
         <label class="col-ms-2 col-form-label">Price</label>
         <div class="col-sm-10">
             <InputNumber class="form-control" @bind-Value="toode.Price" />
+            <ValidationMessage For="@(() => toode.Price)" />
         </div>
     </div>
     <div class="form-group row">
         <label class="col-ms-2 col-form-label">Stock Quantity</label>
         <div class="col-sm-10">
             <InputNumber class="form-control" @bind-Value="toode.StockQuantity" />
+            <ValidationMessage For="@(() => toode.StockQuantity)" />
         </div>
     </div>
     <div class="form-group row">
@@ -60,10 +67,12 @@
     private string title = "Edit";
     private EditContext? editContext;
     private Toode toode = new Toode();
+    private ValidationMessageStore? messageStore;
 
     protected override async Task OnInitializedAsync()
     {
         editContext = new EditContext(toode);
+        messageStore = new ValidationMessageStore(editContext);
 
         if (Id == 0)
         {
@@ -76,12 +85,15 @@
         {
             toode = response.Value;
             editContext = new EditContext(toode);
+            messageStore = new ValidationMessageStore(editContext);
         }
     }
 
     private async Task FormSubmitted()
     {
-        error = "";
+        // Eemalda eelnevad veateated
+        messageStore?.Clear();
+
         var result = await apiClient.Save(toode);
         if (!result.HasErrors)
         {
@@ -89,6 +101,18 @@
             return;
         }
 
-        error = "Viga andmete salvestamisel!";
+        foreach (var error in result.Errors)
+        {
+            messageStore?.Add(new FieldIdentifier(toode, string.Empty), error);
+        }
+
+        foreach (var error in result.PropertyErrors)
+        {
+            var propertyName = error.Key[0].ToString().ToUpper() + error.Key.Substring(1);
+            messageStore?.Add(new FieldIdentifier(toode, propertyName), error.Value);
+        }
+
+        // Teavita EditForm'i, et vead on muutunud
+        editContext?.NotifyValidationStateChanged();
     }
 }

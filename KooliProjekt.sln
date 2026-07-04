@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KooliProjekt.WindowsForms.U
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KooliProjekt.WpfApplication", "KooliProjekt.WpfApplication\KooliProjekt.WpfApplication.csproj", "{0DC92EBA-1864-3915-A766-85B70F06E825}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KooliProjekt.WpfApplication.UnitTests", "KooliProjekt.WpfApplication.UnitTests\KooliProjekt.WpfApplication.UnitTests.csproj", "{C6D20BD6-1D76-F096-FFDA-F69EA4C3F081}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{0DC92EBA-1864-3915-A766-85B70F06E825}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DC92EBA-1864-3915-A766-85B70F06E825}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DC92EBA-1864-3915-A766-85B70F06E825}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6D20BD6-1D76-F096-FFDA-F69EA4C3F081}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6D20BD6-1D76-F096-FFDA-F69EA4C3F081}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6D20BD6-1D76-F096-FFDA-F69EA4C3F081}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6D20BD6-1D76-F096-FFDA-F69EA4C3F081}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

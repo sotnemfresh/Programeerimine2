@@ -1,0 +1,94 @@
+﻿@page "/create"
+@page "/edit/{Id:int}"
+
+@inject KooliProjekt.BlazorWasm.IApiClient apiClient
+@inject NavigationManager NavManager
+
+<h3>@title</h3>
+
+<EditForm EditContext="editContext" OnValidSubmit="@FormSubmitted">
+    <p class="alert-danger">@error</p>
+    <div class="form-group row">
+        <label class="col-ms-2 col-form-label">ID</label>
+        <div class="col-sm-10">
+            @toode.Id
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-ms-2 col-form-label">Name</label>
+        <div class="col-sm-10">
+            <InputText class="form-control" @bind-Value="toode.Name" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-ms-2 col-form-label">Description</label>
+        <div class="col-sm-10">
+            <InputText class="form-control" @bind-Value="toode.Description" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-ms-2 col-form-label">Foto URL</label>
+        <div class="col-sm-10">
+            <InputText class="form-control" @bind-Value="toode.FotoURL" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-ms-2 col-form-label">Price</label>
+        <div class="col-sm-10">
+            <InputNumber class="form-control" @bind-Value="toode.Price" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-ms-2 col-form-label">Stock Quantity</label>
+        <div class="col-sm-10">
+            <InputNumber class="form-control" @bind-Value="toode.StockQuantity" />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label class="col-ms-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private string error = "";
+    private string title = "Edit";
+    private EditContext? editContext;
+    private Toode toode = new Toode();
+
+    protected override async Task OnInitializedAsync()
+    {
+        editContext = new EditContext(toode);
+
+        if (Id == 0)
+        {
+            title = "Add";
+            return;
+        }
+
+        var response = await apiClient.Get(Id);
+        if (!response.HasErrors)
+        {
+            toode = response.Value;
+            editContext = new EditContext(toode);
+        }
+    }
+
+    private async Task FormSubmitted()
+    {
+        error = "";
+        var result = await apiClient.Save(toode);
+        if (!result.HasErrors)
+        {
+            NavManager.NavigateTo("/tooted");
+            return;
+        }
+
+        error = "Viga andmete salvestamisel!";
+    }
+}
